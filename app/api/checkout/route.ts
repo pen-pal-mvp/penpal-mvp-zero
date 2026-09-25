@@ -13,7 +13,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+    // 環境変数に依存せず、リクエスト元のドメインを動的に取得
+    const origin = new URL(request.url).origin
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -24,8 +25,9 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      success_url: `${baseUrl}/success`,
-      cancel_url: `${baseUrl}/letters`,
+      // 決済完了後は設計図通りにプロフィール作成画面へ遷移
+      success_url: `${origin}/profile/new`,
+      cancel_url: `${origin}/terms`,
       client_reference_id: user.id,
       metadata: {
         userId: user.id,
