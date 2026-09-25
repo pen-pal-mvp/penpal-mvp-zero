@@ -3,12 +3,13 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Link from "next/link"
-import { useState, Suspense } from "react"
+import { useState, Suspense, useTransition } from "react"
+import { submitReply } from "./actions"
 
-// UIとロジックを分離した子コンポーネント
 function LetterReplyContent() {
   const [content, setContent] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
   const handleAiAction = async (action: 'translate' | 'proofread') => {
     if (!content) return
@@ -66,7 +67,7 @@ function LetterReplyContent() {
                   size="sm" 
                   className="bg-blue-100 text-blue-800 hover:bg-blue-200"
                   onClick={() => handleAiAction('proofread')}
-                  disabled={isLoading || !content}
+                  disabled={isLoading || !content || isPending}
                 >
                   {isLoading ? '処理中...' : '推敲 / 교정'}
                 </Button>
@@ -75,7 +76,7 @@ function LetterReplyContent() {
                   size="sm" 
                   className="bg-green-100 text-green-800 hover:bg-green-200"
                   onClick={() => handleAiAction('translate')}
-                  disabled={isLoading || !content}
+                  disabled={isLoading || !content || isPending}
                 >
                   {isLoading ? '処理中...' : '翻訳 / 번역'}
                 </Button>
@@ -90,8 +91,12 @@ function LetterReplyContent() {
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button className="bg-blue-600 hover:bg-blue-700 text-white px-8">
-              送信する / 보내기
+            <Button 
+              className="bg-blue-600 hover:bg-blue-700 text-white px-8"
+              disabled={isPending || !content}
+              onClick={() => startTransition(() => { submitReply(content); })}
+            >
+              {isPending ? '送信中...' : '送信する / 보내기'}
             </Button>
           </div>
         </CardContent>
@@ -100,7 +105,6 @@ function LetterReplyContent() {
   )
 }
 
-// Suspense境界でラップした親コンポーネントをデフォルトエクスポート
 export default function LetterReply() {
   return (
     <Suspense fallback={<div className="min-h-screen flex justify-center items-center bg-gray-50 text-gray-500">読み込み中...</div>}>
