@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     }
 
     // 環境変数に依存せず、リクエスト元のドメインを動的に取得
-    const origin = new URL(request.url).origin
+    const origin = request.headers.get('origin') || '[https://penpal-mvp-zero.vercel.app](https://penpal-mvp-zero.vercel.app)'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
