@@ -13,8 +13,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // 環境変数に依存せず、リクエスト元のドメインを動的に取得
-    const origin = request.headers.get('origin') || '[https://penpal-mvp-zero.vercel.app](https://penpal-mvp-zero.vercel.app)'
+    // Vercel環境かローカル環境かを静的に判定してURLを固定化
+    const baseUrl = process.env.NODE_ENV === 'production' 
+      ? 'https://penpal-mvp-zero.vercel.app' 
+      : 'http://localhost:3000'
 
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -25,9 +27,9 @@ export async function POST(request: Request) {
           quantity: 1,
         },
       ],
-      // 決済完了後は設計図通りにプロフィール作成画面へ遷移
-      success_url: `${origin}/profile/new`,
-      cancel_url: `${origin}/terms`,
+      // 固定化したbaseUrlを使用して絶対パスを指定（確実な遷移）
+      success_url: `${baseUrl}/profile/new`,
+      cancel_url: `${baseUrl}/terms`,
       client_reference_id: user.id,
       metadata: {
         userId: user.id,
