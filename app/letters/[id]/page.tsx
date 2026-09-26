@@ -78,7 +78,7 @@ export default function LetterDetailPage() {
               </div>
 
               <Link 
-                href={`/letters/${letter.id}/reply`}
+                href={`/letters/new?to=${letter.sender_id}`}
                 className="block w-full bg-purple-600 hover:bg-purple-700 text-white text-center p-3 rounded-lg font-medium transition-colors"
               >
                 返信を書く / 답장 쓰기
